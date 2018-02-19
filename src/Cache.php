@@ -184,26 +184,26 @@ class Cache
      */
     protected function load(): void
     {
-        $dsn = $this->dsn;
+        $parts = array_map('trim', explode('=', $this->dsn) + [1 => '']);
         $auto = '/^(apc|apcu|wincache|xcache)/';
 
-        if (!$dsn) {
+        if (!$this->dsn) {
             $this->driver = new Driver\NoCache();
-        } elseif (preg_match('/^redis=(.+)/', $dsn, $parts) && extension_loaded('redis')) {
+        } elseif ('redis' === $parts[0] && $parts[1] && extension_loaded('redis')) {
             list($host, $port, $db) = explode(':', $parts[1]) + [1=>0, 2=>null];
 
             $this->driver = new Driver\Redis($host, $db, (int) $port);
-        } elseif (preg_match('/^memcached=(.+)/', $dsn, $parts) && extension_loaded('memcached')) {
+        } elseif ('memcached' === $parts[0] && $parts[1] && extension_loaded('memcached')) {
             $servers = explode(';', $parts[1]);
 
             $this->driver = new Driver\Memcached(...$servers);
-        } elseif (preg_match('/^folder\h*=\h*([^\h]+)/', $dsn, $parts)) {
+        } elseif ('folder' === $parts[0] && $parts[1]) {
             $this->driver = new Driver\FileCache($parts[1]);
-        } elseif (preg_match($auto, $dsn, $parts)) {
+        } elseif (preg_match($auto, $this->dsn, $parts)) {
             $class = __NAMESPACE__ . '\\Driver\\' . $parts[1];
 
             $this->driver = new $class();
-        } elseif ('auto' === strtolower($dsn) && $grep = preg_grep($auto, array_map('strtolower', get_loaded_extensions()))) {
+        } elseif ('auto' === strtolower($this->dsn) && $grep = preg_grep($auto, array_map('strtolower', get_loaded_extensions()))) {
             // Auto-detect
             $class = __NAMESPACE__ . '\\Driver\\' . ucfirst(current($grep));
 
