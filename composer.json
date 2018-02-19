@@ -2,6 +2,7 @@
     "name": "eghojansu/cache-helper",
     "description": "Cache helper",
     "type": "library",
+    "license": "MIT",
     "author": [{
         "name": "Eko Kurniawan",
         "email": "ekokurniawanbs@gmail.com"
