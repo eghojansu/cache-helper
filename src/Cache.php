@@ -54,7 +54,7 @@ class Cache
      */
     public function get(string $key): array
     {
-        $raw = $this->getDriver()->get($this->prefix . $key);
+        $raw = $this->getDriver()->get($this->prefix . '.' . $key);
 
         if ($raw) {
             list($val, $time, $ttl) = (array) $this->unserialize($raw);
@@ -87,7 +87,7 @@ class Cache
 
         $data = $this->serialize([$value, $time, $ttl]);
 
-        $this->getDriver()->set($this->prefix . $key, $data, $ttl);
+        $this->getDriver()->set($this->prefix . '.' . $key, $data, $ttl);
 
         return $this;
     }
@@ -100,7 +100,7 @@ class Cache
      */
     public function clear(string $key): bool
     {
-        return $this->getDriver()->clear($this->prefix . $key);
+        return $this->getDriver()->clear($this->prefix . '.' . $key);
     }
 
     /**
@@ -111,7 +111,7 @@ class Cache
      */
     public function reset(string $suffix = ''): bool
     {
-        return $this->getDriver()->reset($this->prefix, $suffix);
+        return $this->getDriver()->reset($this->prefix . '.', $suffix);
     }
 
     /**
