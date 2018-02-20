@@ -27,7 +27,7 @@ class Cache
     /** @var string */
     protected $dir;
 
-    /** @var SerializerInterface */
+    /** @var string */
     public $serializer;
 
     /**
@@ -36,12 +36,11 @@ class Cache
      * @param string $dsn
      * @param string $prefix
      * @param string $dir
-     * @param SerializerInterface $serializer
      */
-    public function __construct(string $dsn, string $prefix, string $dir, SerializerInterface $serializer)
+    public function __construct(string $dsn, string $prefix, string $dir)
     {
         $this->dir = $dir;
-        $this->serializer = $serializer;
+        $this->serializer = extension_loaded('igbinary') ? 'igbinary' : 'php';
         $this->setPrefix($prefix);
         $this->setDsn($dsn);
     }
@@ -57,7 +56,7 @@ class Cache
         $raw = $this->getDriver()->get($this->prefix . $key);
 
         if ($raw) {
-            list($val, $time, $ttl) = (array) $this->serializer->unserialize($raw);
+            list($val, $time, $ttl) = (array) $this->unserialize($raw);
 
             if (0 === $ttl || $time+$ttl > microtime(true)) {
                 return [$val, $time, $ttl];
@@ -85,7 +84,7 @@ class Cache
             list($old_value, $time, $ttl) = $cached;
         }
 
-        $data = $this->serializer->serialize([$value, $time, $ttl]);
+        $data = $this->serialize([$value, $time, $ttl]);
 
         $this->getDriver()->set($this->prefix . $key, $data, $ttl);
 
@@ -211,6 +210,42 @@ class Cache
         } else {
             // Fallback to filesystem cache
             $this->driver = new Driver\FileCache($this->dir);
+        }
+    }
+
+    /**
+     * Return string representation of PHP value
+     *
+     * @param mixed $arg
+     * @return string
+     *
+     * @codeCoverageIgnore
+     */
+    protected function serialize($arg): string
+    {
+        switch ($this->serializer) {
+            case 'igbinary':
+                return igbinary_serialize($arg);
+            default:
+                return serialize($arg);
+        }
+    }
+
+    /**
+     * Return PHP value derived from string
+     *
+     * @param mixed $arg
+     * @return mixed
+     *
+     * @codeCoverageIgnore
+     */
+    protected function unserialize($arg)
+    {
+        switch ($this->serializer) {
+            case 'igbinary':
+                return igbinary_unserialize($arg);
+            default:
+                return unserialize($arg);
         }
     }
 }

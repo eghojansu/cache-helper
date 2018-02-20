@@ -20,7 +20,6 @@ use Fal\Cache\Driver\NoCache;
 use Fal\Cache\Driver\Redis;
 use Fal\Cache\Driver\Wincache;
 use Fal\Cache\Driver\Xcache;
-use Fal\Cache\Serializer;
 use PHPUnit\Framework\TestCase;
 
 class CacheTest extends TestCase
@@ -58,7 +57,7 @@ class CacheTest extends TestCase
 
     protected function cache($dsn)
     {
-        $this->cache = new Cache($dsn, 'test', TEMP . 'cache/', new Serializer());
+        $this->cache = new Cache($dsn, 'test', TEMP . 'cache/');
     }
 
     /** @dataProvider cacheProvider */
