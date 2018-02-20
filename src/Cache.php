@@ -36,11 +36,12 @@ class Cache
      * @param string $dsn
      * @param string $prefix
      * @param string $dir
+     * @param string $serializer
      */
-    public function __construct(string $dsn, string $prefix, string $dir)
+    public function __construct(string $dsn, string $prefix, string $dir, string $serializer = '')
     {
         $this->dir = $dir;
-        $this->serializer = extension_loaded('igbinary') ? 'igbinary' : 'php';
+        $this->serializer = '' === $serializer ? (extension_loaded('igbinary') ? 'igbinary' : 'php') : $serializer;
         $this->setPrefix($prefix);
         $this->setDsn($dsn);
     }
