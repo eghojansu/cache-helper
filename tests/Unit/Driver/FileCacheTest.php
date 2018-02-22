@@ -26,7 +26,9 @@ class FileCacheTest extends TestCase
     public function tearDown()
     {
         $this->driver->reset();
-        @rmdir(TEMP . 'cache');
+        if (file_exists($dir = TEMP . 'cache')) {
+            rmdir($dir);
+        }
     }
 
     public function testName()

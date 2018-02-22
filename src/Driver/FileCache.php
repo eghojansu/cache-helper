@@ -25,7 +25,7 @@ class FileCache implements CacheInterface
         $this->dir = $dir;
 
         if (!file_exists($dir)) {
-            @mkdir($dir, 0755, true);
+            mkdir($dir, 0755, true);
         }
     }
 
@@ -42,7 +42,9 @@ class FileCache implements CacheInterface
      */
     public function get(string $key): string
     {
-        return (string) @file_get_contents($this->dir . $key);
+        $file = $this->dir . $key;
+
+        return file_exists($file) ? file_get_contents($file) : '';
     }
 
     /**
@@ -60,7 +62,9 @@ class FileCache implements CacheInterface
      */
     public function clear(string $key): bool
     {
-        return @unlink($this->dir . $key);
+        $file = $this->dir . $key;
+
+        return file_exists($file) ? unlink($file) : false;
     }
 
     /**
@@ -68,8 +72,8 @@ class FileCache implements CacheInterface
      */
     public function reset(string $prefix = '', string $suffix = ''): bool
     {
-        foreach ((@glob($this->dir . $prefix . '*' . $suffix) ?: []) as $file) {
-            @unlink($file);
+        foreach ((glob($this->dir . $prefix . '*' . $suffix) ?: []) as $file) {
+            unlink($file);
         }
 
         return true;

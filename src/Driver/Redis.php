@@ -28,11 +28,14 @@ class Redis implements CacheInterface
     public function __construct(string $host, ?int $db = null, int $port = 0)
     {
         $this->ref = new Ref();
-        if (!@$this->ref->connect($host, $port ?: 6379, 2)) {
+        try {
+            $this->ref->connect($host, $port ?: 6379, 2);
+
+            if (isset($db)) {
+                $this->ref->select($db);
+            }
+        } catch(\Throwable $e) {
             throw new \LogicException('Failed connect with your redis server');
-        }
-        if (isset($db)) {
-            $this->ref->select($db);
         }
     }
 
